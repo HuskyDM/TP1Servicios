@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+
+<!-- Descripción WSDL de la clase Hola Mundo. -->
+
+<definitions name="ECCI_HolaMundo"
+             targetNamespace="urn:ECCI_HolaMundo"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="urn:ECCI_HolaMundo"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <!-- Tipos complejos -->
+
+  <types xmlns="http://schemas.xmlsoap.org/wsdl/">
+    <xsd:schema targetNamespace="urn:ECCI_HolaMundo">
+      <xsd:element name="salude">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="nombre" type="xsd:string" nillable="true" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="saludeReturn">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="saludeResult" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="servidorEstampillaDeTiempo">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:element name="servidorEstampillaDeTiempoReturn">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="servidorEstampillaDeTiempoResult" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ultimoSaludo">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:element name="ultimoSaludoReturn">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="ultimoSaludoResult" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <!-- Mensajes para comunicarse con la clase HolaMundo. -->
+
+  <message name="saludeRequest">
+    <part name="parameters" element="tns:salude" />
+  </message>
+
+  <message name="saludeResponse">
+    <part name="parameters" element="tns:saludeReturn" />
+  </message>
+
+  <message name="servidorEstampillaDeTiempoRequest">
+    <part name="parameters" element="tns:servidorEstampillaDeTiempo" />
+  </message>
+
+  <message name="servidorEstampillaDeTiempoResponse">
+    <part name="parameters" element="tns:servidorEstampillaDeTiempoReturn" />
+  </message>
+
+  <message name="ultimoSaludoRequest">
+    <part name="parameters" element="tns:ultimoSaludo" />
+  </message>
+
+  <message name="ultimoSaludoResponse">
+    <part name="parameters" element="tns:ultimoSaludoReturn" />
+  </message>
+
+  <!-- Puerto para comunicar con la clase HolaMundo, "ECCI_HolaMundo" -->
+
+  <portType name="ECCI_HolaMundoPort">
+
+    <operation name="salude">
+      <input message="tns:saludeRequest" />
+      <output message="tns:saludeResponse" />
+    </operation>
+
+    <operation name="servidorEstampillaDeTiempo">
+      <input message="tns:servidorEstampillaDeTiempoRequest" />
+      <output message="tns:servidorEstampillaDeTiempoResponse" />
+    </operation>
+
+    <operation name="ultimoSaludo">
+      <input message="tns:ultimoSaludoRequest" />
+      <output message="tns:ultimoSaludoResponse" />
+    </operation>
+
+  </portType>
+
+  <!-- Vinculación de los llamados con el transporte - RPC, SOAP over HTTP -->
+
+  <binding name="ECCI_HolaMundoBinding" type="tns:ECCI_HolaMundoPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+    <operation name="salude">
+      <soap:operation soapAction="urn:ECCI_HolaMundo#HolaMundo#salude" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+
+    <operation name="servidorEstampillaDeTiempo">
+      <soap:operation soapAction="urn:ECCI_HolaMundo#HolaMundo#servidorEstampillaDeTiempo" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+
+    <operation name="ultimoSaludo">
+      <soap:operation soapAction="urn:ECCI_HolaMundo#HolaMundo#ultimoSaludo" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+
+  <!-- Punto de comunicación con la clase HolaMundo -->
+
+  <service name="ECCI_HolaMundo">
+    <documentation />
+    <port name="ECCI_HolaMundoPort" binding="tns:ECCI_HolaMundoBinding">
+      <soap:address location="http://titanic.ecci.ucr.ac.cr:80/~bsolano/HolaMundoServiceDocumentLiteral/" />
+    </port>
+  </service>
+
+</definitions>
