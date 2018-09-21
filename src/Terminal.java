@@ -13,8 +13,7 @@ import java.util.Scanner;
 
 public class Terminal {
     
-    Scanner input;
-      
+    Scanner input;     
     
     public String username(){   
     this.input= new Scanner(System.in);
