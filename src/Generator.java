@@ -1,18 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 import java.io.*;
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- *
- * @author Jay
- */
+
 public class Generator {
 
     FileInputStream file;
@@ -31,7 +24,8 @@ public class Generator {
     }
    
 
-    //Makes the header of the wsdl
+    //Genera la cabeza del documento
+    //Recibe un string namespace que es el nombre de la clase
     public void genHeader(BufferedWriter wr, String namespace) {
         try {
             wr.write("<?xml version=\"1.0\"?>");
@@ -59,7 +53,9 @@ public class Generator {
         }
     }
 
-    //Makes the types of the wsdl
+    //Genera los tipos de wsdl
+    //Como pueden haber varios se llama a typeWriter que
+    //Genera tantos types como sean necesarios
     public void genTypes(BufferedWriter wr, String namespace, List<String> typeName, List<String> typeType) {
 
         //There can be multiple types, should have an array loop
@@ -97,7 +93,10 @@ public class Generator {
                 wr.write("<xsd:sequence>");
                 wr.newLine();
                 
-                //TODO: Nota: hay metodos sin tipos, hay que arreglar esto
+                /*TODO: Nota: hay metodos sin tipos, hay que preguntar eso
+                Asuma que name y type tienen la misma cantidad de elementos en sus
+                listas y que no hay ningun nillable
+                */
                 wr.write("<xsd:element name=\"" + typeName.get(i) + "\" type=\"xsd:" + typeType.get(i) + "\"/>");
                 
                 wr.newLine();
