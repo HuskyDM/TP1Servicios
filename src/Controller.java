@@ -12,11 +12,11 @@ public class Controller {
     
         
     public static void main(String[]arg){
-        String sr = "Hello \n Bye";
+        String sr = "Enter the Filename";
         System.out.println(sr);
-       Terminal terminal = new Terminal();
+        Terminal terminal = new Terminal();
         Generator trial = new Generator(terminal.username());
-        trial.wsdlGen("ejemplo");
+        trial.wsdlGen(trial.filename);
     }
     
 }
