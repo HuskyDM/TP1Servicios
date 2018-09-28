@@ -104,11 +104,10 @@ public class Generator {
                 Asuma que name y type tienen la misma cantidad de elementos en sus
                 listas y que no hay ningun nillable
                 */
-                for(int c = 0; c < vnames.size(); ++c){
-                    wr.write("<xsd:element name=\"" + vnames.get(i).get(c) + "\" type=\"xsd:" + vtypes.get(i).get(c) + "\"/>");
+                for(int c = 0; c < vnames.get(i).size(); ++c){
+                    wr.write("<xsd:element name=\"" + vnames.get(i).get(c) + "\" type=\"xsd:" + vtypes.get(i).get(c) + "\"/>\n");
                 }
                 
-                wr.newLine();
                 wr.write("</xsd:sequence>");
                 wr.newLine();
                 wr.write("</xsd:complexType>");
@@ -179,8 +178,9 @@ public class Generator {
                 wr.newLine();
                 for(int c = 0; c < vnames.get(i).size();++c){
                     wr.write("<input message=\"tns:" + vnames.get(i).get(c) + "\"/>");
+                    wr.newLine();
                 }
-                wr.newLine();
+                
                 wr.write("<output message=\"tns:" + rtypes.get(i) + "TypeReturn\" />");
                 wr.newLine();
                 wr.write("</operation>");
@@ -412,4 +412,6 @@ public class Generator {
             System.out.println("Error: Unable to create file");
         }
     }
+
+
 */
