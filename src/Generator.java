@@ -10,17 +10,21 @@ import java.util.Scanner;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 
 public class Generator {
 
     FileInputStream file;
     FileOutputStream file2;
-    String filename;
-    List<String> methodName;
-    List<String> methodType;
-    List<String> variableName;
-    List<String> variableType;
-    List<String> primitives;
+    String filename; // Nombre del archivo
+    List<String> methodName; // Nombre de los metodos
+    List<String> methodType; // Tipo de los metodos
+    ArrayList<String> variableName; // Nombre de variables globales
+    ArrayList<String> variableType; // Tipos de variables globales
+    ArrayList<ArrayList<String>> variableNames; // Nombre de parametros de metodos
+    ArrayList<ArrayList<String>> variableTypes; // Nombre de tipos de parametros de metodos
+    List<String> primitives; // Tipos de datos primitivos, restos de una funcion antigua
+    ArrayList<String> rtypes;
 
     public Generator(String name) { //name se envia como parametro desde controller
         this.filename = name;
@@ -59,7 +63,7 @@ public class Generator {
     //Genera los tipos de wsdl
     //Como pueden haber varios se llama a typeWriter que
     //Genera tantos types como sean necesarios
-    public void genTypes(BufferedWriter wr, String namespace, List<String> methodName, List<String> methodType) {
+    public void genTypes(BufferedWriter wr, String namespace, List<String> methodName, List<String> methodType, ArrayList<ArrayList<String>> vnames, ArrayList<ArrayList<String>> vtypes) {
 
         //There can be multiple types, should have an array loop
         try {
@@ -69,7 +73,7 @@ public class Generator {
             wr.write(" <xsd:schema targetNamespace=\"urn:" + namespace + "\">");
             wr.newLine();
 
-           typeWriter(methodName, methodType, wr);
+           typeWriter(methodName, methodType, wr, vnames, vtypes);
 
             wr.write("</xsd:schema>");
             wr.newLine();
@@ -86,7 +90,7 @@ public class Generator {
     //Genera tantas etiquetas types a como hayan tipos
     //Todos los metodos tienen nombre pero algunos no tienen tipos por lo que se generan tantos como
     //hayan nombres disponibles en la lista
-    public void typeWriter(List<String> methodName, List<String> methodType, BufferedWriter wr){
+    public void typeWriter(List<String> methodName, List<String> methodType, BufferedWriter wr, ArrayList<ArrayList<String>> vnames, ArrayList<ArrayList<String>> vtypes){
     try{
          for (int i = 0; i < methodName.size(); ++i) {
                 wr.write("<xsd:element name=\"" + methodName.get(i) + "\">");
@@ -100,7 +104,9 @@ public class Generator {
                 Asuma que name y type tienen la misma cantidad de elementos en sus
                 listas y que no hay ningun nillable
                 */
-                wr.write("<xsd:element name=\"" + methodName.get(i) + "\" type=\"xsd:" + methodType.get(i) + "\"/>");
+                for(int c = 0; c < vnames.size(); ++c){
+                    wr.write("<xsd:element name=\"" + vnames.get(i).get(c) + "\" type=\"xsd:" + vtypes.get(i).get(c) + "\"/>");
+                }
                 
                 wr.newLine();
                 wr.write("</xsd:sequence>");
@@ -121,24 +127,17 @@ public class Generator {
     //Todos los mensajes tienen name y element
     //messageName y messageElement entonces tienen el mismo tamaño
     
-    public void genMessage(BufferedWriter wr, List<String> messageName) {
-        String extra;
-        String extra2;
+    public void genMessage(BufferedWriter wr, List<String> messageName, ArrayList<ArrayList<String>> vnames, ArrayList<String> rtypes) {
+        
         try {
-            for(int i=0;i<messageName.size()*2;++i){
-                if(i%2 == 0){
-                    extra = "Request";
-                    extra2 = "";
-                }
-                else{
-                    extra = "Response";
-                    extra2 = "Return";
-                }
-                wr.write("<message name=\"" + messageName.get(i/2) + extra + "\">");
+            for(int i=0;i<messageName.size();++i){
+                
+                wr.write("<message name=\"" + messageName.get(i/2) + "\">");
                 wr.newLine();
             
                 //TODO parameters es igual en todo?
-                wr.write("<part name=\"parameters\" element=\"tns:" + messageName.get(i/2) + extra2 + "\" />");
+                
+                wr.write("<part name=\"" + vnames.get(i) + "\" element=\"tns:" + rtypes.get(i) + "\" />");
             
                 wr.newLine();
                 wr.write(" </message>");
@@ -156,12 +155,12 @@ public class Generator {
     //Solo hay dos listas, opName y opMethod ya que se le añader Request o Response dependiendo
     //si es Input o Output
     
-    public void genPort(BufferedWriter wr, String namespace, List<String> opName) {
+    public void genPort(BufferedWriter wr, String namespace, List<String> opName, ArrayList<ArrayList<String>> vnames, ArrayList<ArrayList<String>> vtypes, ArrayList<String> rtypes) {
         try {
             wr.write("<portType name=\"" + namespace + "Port\">");
             wr.newLine();
            
-            opGen(opName, wr);
+            opGen(opName, wr, vnames, vtypes, rtypes);
             
             wr.write("</portType>");
             wr.newLine();
@@ -172,18 +171,21 @@ public class Generator {
         }
     }
     
-    public void opGen(List<String>opName, BufferedWriter wr){
+    public void opGen(List<String>opName, BufferedWriter wr, ArrayList<ArrayList<String>> vnames, ArrayList<ArrayList<String>> vtypes, ArrayList<String> rtypes){
     
         try{ 
             for(int i=0;i<opName.size();++i){
-            wr.write("<operation name=\"" + opName.get(i) + "\">");
-            wr.newLine();
-            wr.write("<input message=\"tns:" + opName.get(i) + "Request\" />");
-            wr.newLine();
-            wr.write("<output message=\"tns:" + opName.get(i) + "Response\" />");
-            wr.newLine();
-            wr.write("</operation>");
-            wr.newLine();}
+                wr.write("<operation name=\"" + opName.get(i) + "\">");
+                wr.newLine();
+                for(int c = 0; c < vnames.get(i).size();++c){
+                    wr.write("<input message=\"tns:" + vnames.get(i).get(c) + "\"/>");
+                }
+                wr.newLine();
+                wr.write("<output message=\"tns:" + rtypes.get(i) + "TypeReturn\" />");
+                wr.newLine();
+                wr.write("</operation>");
+                wr.newLine();
+            }
         }
         catch(Exception e){
         e.printStackTrace();
@@ -277,7 +279,10 @@ public class Generator {
             this.methodType = new ArrayList<String>();
             this.variableName = new ArrayList<String>();
             this.variableType = new ArrayList<String>();
+            this.variableNames = new ArrayList<ArrayList<String>>();
+            this.variableTypes = new ArrayList<ArrayList<String>>();
             this.primitives = new ArrayList<String>();
+            this.rtypes = new ArrayList<String>();
             
             primitives.add("Boolean");
             primitives.add("Character");
@@ -323,24 +328,43 @@ public class Generator {
             Method[] methods = hostage.getDeclaredMethods();
             
             for (Field field : fields) {
-                if(!(primitives.contains(field.getType().getCanonicalName()) || variableType.contains(field.getType().getCanonicalName()))){
-                    privateFields.add(field);
-                    this.variableType.add(field.getType().getCanonicalName());
-                    this.variableName.add(field.getName());
+                privateFields.add(field);
+                this.variableType.add(field.getType().getCanonicalName());
+                this.variableName.add(field.getName());
+            }
+            
+            for (int c = 0; c < methods.length; ++c) {
+                // Nombres de los metodos
+                
+                Method method = methods[c];
+                this.methodName.add(method.getName());
+                this.methodType.add(method.getReturnType().getCanonicalName());
+                
+                this.rtypes.add(method.getReturnType().getCanonicalName());
+                
+                // Lista de parametros y sus clases
+                
+                Parameter[] pars = method.getParameters();
+                Class[] typs = method.getParameterTypes();
+                
+                // Listas globales que contendran los string que las representan
+                
+                this.variableNames.add(new ArrayList<String>());
+                this.variableTypes.add(new ArrayList<String>());
+                for (Parameter par : pars){
+                    this.variableNames.get(c).add(par.getName());
+                }
+                for (Class typ : typs){
+                    this.variableTypes.get(c).add(typ.getSimpleName());
                 }
             }
             
-            for (Method method : methods) {
-                this.methodType.add(method.getName());
-                this.methodName.add(method.getReturnType().getCanonicalName());
-            }
-            
             BufferedWriter wr = new BufferedWriter(new FileWriter(this.filename + ".wsdl"));
-            genHeader(wr, classname); //
-            genTypes(wr,classname,methodName, methodType); //
-            genMessage(wr,methodType);
-            genPort(wr,classname, methodType);
-            genBinding(wr,classname,methodType,classname);
+            genHeader(wr, classname); // Header
+            genTypes(wr,classname,methodName, methodType,variableNames,variableTypes); // Tipos
+            genMessage(wr,methodName,variableNames,rtypes);
+            genPort(wr,classname, methodName,variableNames,variableTypes,rtypes);
+            genBinding(wr,classname,methodName,classname);
             genService(wr,classname,classname);
             wr.close();
         } catch (Exception e) {
@@ -388,6 +412,4 @@ public class Generator {
             System.out.println("Error: Unable to create file");
         }
     }
-
-
 */
